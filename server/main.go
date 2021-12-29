@@ -1,17 +1,23 @@
 package main
 
 import (
-	"log"
-	"net/http"
-
+	"os"
 	"tripit/routes"
-	"tripit/utils"
+
+	"github.com/gin-gonic/gin"
 )
 
 func main() {
-	utils.ConnectDatabase()
+	port := os.Getenv("PORT")
 
-	r := routes.Router()
+	if port == "" {
+		port = "8000"
+	}
 
-	log.Fatal(http.ListenAndServe(":8000", r))
+	router := gin.New()
+	router.Use(gin.Logger())
+
+	routes.SetupRoutes(router)
+
+	router.Run(":" + port)
 }

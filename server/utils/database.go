@@ -5,34 +5,47 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"time"
 
 	"github.com/joho/godotenv"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-func init() {
-	loadTheEnv()
-}
-
-func loadTheEnv() {
+func DBInstance() *mongo.Client {
 	err := godotenv.Load(".env")
+
+	if err != nil {
+		log.Fatal("error loading the .env file")
+	}
+
+	client, err := mongo.NewClient(options.Client().ApplyURI(os.Getenv("DB_URI")))
 
 	if err != nil {
 		log.Fatal(err)
 	}
-}
 
-func ConnectDatabase() {
-	dbURI := os.Getenv("DB_URI")
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 
-	clientOptions := options.Client().ApplyURI(dbURI)
+	defer cancel()
 
-	_, err := mongo.Connect(context.TODO(), clientOptions)
+	err = client.Connect(ctx)
 
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	fmt.Println("Connected to MongoDB!")
+
+	return client
+}
+
+//Client Database instance
+var Client *mongo.Client = DBInstance()
+
+func OpenCollection(client *mongo.Client, collectionName string) *mongo.Collection {
+
+	var collection *mongo.Collection = client.Database("tripit").Collection(collectionName)
+
+	return collection
 }

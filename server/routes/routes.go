@@ -2,22 +2,22 @@ package routes
 
 import (
 	"tripit/controllers"
+	"tripit/middleware"
 
-	"github.com/gorilla/mux"
+	"github.com/gin-gonic/gin"
 )
 
-func Router() *mux.Router {
-	router := mux.NewRouter()
+func SetupRoutes(router *gin.Engine) {
+	home := router.Group("/")
+	{
+		home.GET("/", controllers.GetHome())
+	}
 
-	router.HandleFunc("/", controllers.GetHome).Methods("GET", "OPTIONS")
-
-	//TODO...
-	//router.HandleFunc("/signup", ...).Methods("POST", "OPTIONS")
-	//router.HandleFunc("/signin", ...).Methods("POST", "OPTIONS")
-	//router.HandleFunc("/logout", ...).Methods("POST", "OPTIONS")
-	//router.HandleFunc("/user/{id}", ...).Methods("GET", "OPTIONS")
-	//router.HandleFunc("/user/{id}", ...).Methods("PUT", "OPTIONS")
-	//router.HandleFunc("/user/{id}", ...).Methods("DELETE", "OPTIONS")
-
-	return router
+	authentication := router.Group("/user")
+	{
+		authentication.GET("/:id", middleware.Authentication(), controllers.GetUser())
+		authentication.POST("/register", controllers.Register())
+		authentication.POST("/login", controllers.Login())
+		authentication.GET("/logout", controllers.Logout())
+	}
 }
