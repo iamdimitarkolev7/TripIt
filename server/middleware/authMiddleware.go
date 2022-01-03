@@ -3,6 +3,7 @@ package middleware
 import (
 	"fmt"
 	"os"
+	"strings"
 	"tripit/utils"
 
 	"github.com/dgrijalva/jwt-go"
@@ -11,9 +12,10 @@ import (
 
 func Authentication() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		tokenStr, cookieErr := c.Cookie("token")
+		cookieHeaderString := c.Request.Header.Get("Cookie")
+		tokens := strings.Split(cookieHeaderString, "=")
 
-		if cookieErr != nil {
+		if len(tokens) != 2 || tokens[1] == "" {
 			c.Abort()
 			c.JSON(401, utils.ResponseMessage{
 				Success: false,
@@ -21,6 +23,8 @@ func Authentication() gin.HandlerFunc {
 			})
 			return
 		}
+
+		tokenStr := tokens[1]
 
 		token, parseErr := jwt.Parse(tokenStr, func(token *jwt.Token) (interface{}, error) {
 			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {

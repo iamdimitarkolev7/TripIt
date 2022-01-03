@@ -18,6 +18,6 @@ func SetupRoutes(router *gin.Engine) {
 		authentication.GET("/:id", middleware.Authentication(), controllers.GetUser())
 		authentication.POST("/register", controllers.Register())
 		authentication.POST("/login", controllers.Login())
-		authentication.GET("/logout", controllers.Logout())
+		authentication.GET("/logout", middleware.Authentication(), controllers.Logout())
 	}
 }
