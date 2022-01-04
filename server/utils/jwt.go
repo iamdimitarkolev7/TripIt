@@ -1,7 +1,6 @@
 package utils
 
 import (
-	"log"
 	"os"
 	"time"
 
@@ -17,26 +16,6 @@ type SignedDetails struct {
 }
 
 var SECRET_KEY string = os.Getenv("SECRET_KEY")
-
-func GenerateAllTokens(email string, name string, uid primitive.ObjectID) (signedToken string, err error) {
-	claims := &SignedDetails{
-		Email: email,
-		Name:  name,
-		Uid:   uid,
-		StandardClaims: jwt.StandardClaims{
-			ExpiresAt: time.Now().Local().Add(time.Hour * time.Duration(24)).Unix(),
-		},
-	}
-
-	token, tokenErr := jwt.NewWithClaims(jwt.SigningMethodHS256, claims).SignedString([]byte(SECRET_KEY))
-
-	if tokenErr != nil {
-		log.Fatal(tokenErr)
-		return
-	}
-
-	return token, err
-}
 
 func ValidateToken(signedToken string) (claims *SignedDetails, msg string) {
 	token, err := jwt.ParseWithClaims(
